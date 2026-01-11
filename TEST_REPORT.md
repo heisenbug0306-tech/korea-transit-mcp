@@ -274,3 +274,71 @@ URL: http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid?serviceKey={API_KE
 ---
 
 *API 테스트 업데이트: 2026-01-11*
+
+---
+
+## Vercel 배포 테스트 (2026-01-12)
+
+### 테스트 개요
+
+| 항목 | 내용 |
+|------|------|
+| 테스트 일시 | 2026년 1월 12일 00:15 |
+| 테스트 방법 | MCP 엔드포인트 직접 호출 |
+| 배포 URL | https://koreatransitmcp.vercel.app |
+| GitHub | https://github.com/heisenbug0306-tech/korea-transit-mcp |
+| 테스트 도구 | 6개 (전체) |
+
+### 6개 도구 테스트 결과
+
+| 도구 | 상태 | 테스트 입력 | 결과 요약 |
+|------|------|------------|----------|
+| transit_get_subway_arrival | ✅ PASS | 강남 | 심야 시간 - 도착 예정 열차 없음 (정상) |
+| transit_get_subway_status | ✅ PASS | 2호선 | "정상 운행 중" 반환 |
+| transit_search_bus_station | ✅ PASS | 강남역 | 응답 정상 |
+| transit_get_bike_station | ✅ PASS | 강남 | 응답 정상 |
+| **transit_get_bus_arrival** | ✅ **PASS** | 22341 | **실제 버스 도착정보 반환** |
+| transit_get_combined_info | ✅ PASS | 홍대입구 | 통합 정보 응답 |
+
+### 핵심 수정 사항: transit_get_bus_arrival
+
+**이전 상태 (2026-01-01):**
+- "서비스 준비중" 메시지만 반환
+- API 호출 없이 하드코딩된 응답
+
+**수정 후 (2026-01-11):**
+- 공공데이터포털 버스 도착정보 API 연동 완료
+- 실제 버스 도착 데이터 반환
+
+**테스트 결과 예시 (정류장 22341 - 옛골):**
+```
+🚌 옛골 버스 도착정보
+정류장 번호: 22341 | 2개 노선
+
+1. 4432 (광역)
+   - 첫번째 버스: 8분후 [7번째 전]
+   - 두번째 버스: [막차] 27분후 [19번째 전]
+
+2. 341성남 (기타)
+   - 첫번째 버스: 운행종료
+   - 두번째 버스: 운행종료
+```
+
+### 수정 내역
+
+| 파일 | 변경 내용 |
+|------|----------|
+| api/index.ts | BusArrival 인터페이스 추가 |
+| api/index.ts | transitGetBusArrival 함수 - API 호출 로직 구현 |
+
+### 결론
+
+**6개 도구 모두 정상 작동 확인 (100% PASS)**
+
+- transit_get_bus_arrival이 "서비스 준비중"에서 **실제 API 연동**으로 수정됨
+- 모든 도구가 실제 데이터를 반환
+- PlayMCP 재심사 준비 완료
+
+---
+
+*Vercel 배포 테스트 완료: 2026-01-12*
